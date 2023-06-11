@@ -1,0 +1,7 @@
+test.hxml
+
+--next
+
+-cp src
+-main envpaths.EnvPaths
+--interp
