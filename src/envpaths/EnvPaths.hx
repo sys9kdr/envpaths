@@ -72,11 +72,13 @@ final envPaths = (name:String, ?suffix:String) -> {
 		// Add suffix to prevent possible conflict with native apps
 		name += "-${suffix}";
 	}
-	if (Sys.systemName() == 'Mac') {
-		return macos(name);
+	switch (Sys.systemName()) {
+		case "Mac":
+			return macos(name);
+		case "Windows":
+			return windows(name);
+		default:
+			// BSD is like Linux
+			return linux(name);
 	}
-	if (Sys.systemName() == 'Windows') {
-		return windows(name);
-	}
-	return linux(name); // BSD is like Linux.
 }
