@@ -1,23 +1,21 @@
 package envpaths;
 
 import haxe.io.Path;
-//import haxe.io.*;
 import Sys;
 
 typedef Envpath = {
-		home: String,
-		data: String,
-		config: String,
-		cache: String,
-		log: String,
-		temp: String,
+	home:String,
+	data:String,
+	config:String,
+	cache:String,
+	log:String,
+	temp:String,
 }
 
-final macos: String -> Envpath = name -> {
+final macos:String->Envpath = name -> {
 	final homedir = Sys.getEnv('HOME');
 	final tmpdir = Sys.getEnv('TMPDIR');
 	final library = Path.join([homedir, 'Library']);
-
 	return {
 		home: homedir,
 		data: Path.join([library, 'Application Support', name]),
@@ -33,7 +31,6 @@ final windows = name -> {
 	final tmpdir = Sys.getEnv('TEMP');
 	final appData = Sys.getEnv('APPDATA') ?? Path.join([homedir, 'AppData', 'Roaming']);
 	final localAppData = Sys.getEnv('LOCALAPPDATA') ?? Path.join([homedir, 'AppData', 'Local']);
-
 	return {
 		// Data/config/cache/log are invented by me as Windows isn't opinionated about this
 		home: homedir,
@@ -50,7 +47,6 @@ final linux = name -> {
 	final homedir = Sys.getEnv('HOME');
 	final username = Path.withoutDirectory(homedir);
 	final tmpdir = Sys.getEnv("TMPDIR") ?? Sys.getEnv("TMP") ?? "/tmp";
-	
 	return {
 		home: homedir,
 		data: Path.join(linuxPathHelper("XDG_DATA_HOME", [homedir, '.local', 'share'], name)),
@@ -62,28 +58,25 @@ final linux = name -> {
 	};
 };
 
-final linuxPathHelper: String -> Array<String> -> String -> Array<String> = (env, path, name) -> {
-    final xdgPath = Sys.getEnv(env);
-    if (Std.isOfType(xdgPath, String)){
-        return [xdgPath, name];
-    } else {
-        return path.concat([name]);
-    }
+final linuxPathHelper:String->Array<String>->String->Array<String> = (env, path, name) -> {
+	final xdgPath = Sys.getEnv(env);
+	if (Std.isOfType(xdgPath, String)) {
+		return [xdgPath, name];
+	} else {
+		return path.concat([name]);
+	}
 }
 
-function envPaths(name: String, ?suffix: String) {
+final envPaths = (name:String, ?suffix:String) -> {
 	if (Std.isOfType(suffix, String) && suffix != "") {
 		// Add suffix to prevent possible conflict with native apps
 		name += "-${suffix}";
 	}
-
 	if (Sys.systemName() == 'Mac') {
 		return macos(name);
 	}
-
 	if (Sys.systemName() == 'Windows') {
 		return windows(name);
 	}
-
 	return linux(name); // BSD is like Linux.
 }

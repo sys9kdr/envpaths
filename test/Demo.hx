@@ -1,5 +1,5 @@
 import envpaths.EnvPaths;
 
-function main(){
-    trace(envPaths(""));
+final main = () -> {
+	trace(envPaths(""));
 }
