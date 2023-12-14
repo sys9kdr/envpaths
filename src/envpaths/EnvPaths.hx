@@ -12,7 +12,9 @@ typedef Envpath = {
 	temp:String,
 }
 
-final macos:String->Envpath = name -> {
+typedef GetEnvPath = String->Envpath
+
+final macos: GetEnvPath = name -> {
 	final homedir = Sys.getEnv('HOME');
 	final tmpdir = Sys.getEnv('TMPDIR');
 	final library = Path.join([homedir, 'Library']);
@@ -26,7 +28,7 @@ final macos:String->Envpath = name -> {
 	};
 };
 
-final windows = name -> {
+final windows: GetEnvPath = name -> {
 	final homedir = Sys.getEnv('USERPROFILE');
 	final tmpdir = Sys.getEnv('TEMP');
 	final appData = Sys.getEnv('APPDATA') ?? Path.join([homedir, 'AppData', 'Roaming']);
@@ -43,7 +45,7 @@ final windows = name -> {
 };
 
 // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-final linux = name -> {
+final linux: GetEnvPath= name -> {
 	final homedir = Sys.getEnv('HOME');
 	final username = Path.withoutDirectory(homedir);
 	final tmpdir = Sys.getEnv("TMPDIR") ?? Sys.getEnv("TMP") ?? "/tmp";
@@ -58,16 +60,16 @@ final linux = name -> {
 	};
 };
 
-final linuxPathHelper:String->Array<String>->String->Array<String> = (env, path, name) -> {
+private final linuxPathHelper = (env: String, path:Array<String>, name: String) -> ({
 	final xdgPath = Sys.getEnv(env);
 	if (Std.isOfType(xdgPath, String)) {
 		return [xdgPath, name];
 	} else {
 		return path.concat([name]);
 	}
-}
+} : Array<String>);
 
-final envPaths = (name:String, ?suffix:String) -> {
+final envPaths = (name:String, ?suffix:String) -> ({
 	if (Std.isOfType(suffix, String) && suffix != "") {
 		// Add suffix to prevent possible conflict with native apps
 		name += "-${suffix}";
@@ -77,8 +79,8 @@ final envPaths = (name:String, ?suffix:String) -> {
 			return macos(name);
 		case "Windows":
 			return windows(name);
-		default:
+		case _:
 			// BSD is like Linux
 			return linux(name);
 	}
-}
+} : Envpath );
